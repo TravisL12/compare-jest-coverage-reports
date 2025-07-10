@@ -4,14 +4,16 @@ Use this to compare a jest coverage report with another branch to see the covera
 
 ### Setup
 
-Run a jest coverage report with coverage-summary on `main` with the `coverageReporters` on:
+Run a jest coverage report with coverage-summary on both branches and then copy the "coverage-summary.json" file from each run into this project.
+
+Start with your dev branch:
 ```
 // Run on branch
 yarn jest --coverage --changedSince main --coverageReporters="json-summary"
 ```
 Checkout your dev branch and run the command from above. Change the "coverage/coverage-summary.json" file to "coverage-summary_branch.json" and copy it into this project directory.
 
-Now switch over to `main`
+Now switch over to `main`:
 ```
 // Run on main (REMEMBER TO UPDATE THE BRANCH NAME)
 yarn jest $(git diff --name-only main...<BRANCH_NAME> | grep -vE 'test|styles|json' | xargs -n1 dirname | sort -u) --coverage --coverageReporters="json-summary"
