@@ -11,9 +11,6 @@ yarn jest --coverage --changedSince main --coverageReporters="json-summary"
 
 // Run on main (REMEMBER TO UPDATE THE BRANCH NAME)
 yarn jest $(git diff --name-only main...<BRANCH_NAME> | grep -vE 'test|styles|json' | xargs -n1 dirname | sort -u) --coverage --coverageReporters="json-summary"
-
-// To avoid main running all files, just do coverage on the ones changed in your branch (doesn't work yet)
-(see notes section)
 ```
 
 In your project folder a "coverage-summary.json" file will be created. Copy this into the directory of this project.
