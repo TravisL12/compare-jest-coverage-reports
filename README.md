@@ -8,14 +8,15 @@ Run a jest coverage report with coverage-summary on `main` with the `coverageRep
 ```
 // Run on branch
 yarn jest --coverage --changedSince main --coverageReporters="json-summary"
+```
+Checkout your dev branch and run the command from above. Change the "coverage/coverage-summary.json" file to "coverage-summary_branch.json" and copy it into this project directory.
 
+Now switch over to `main`
+```
 // Run on main (REMEMBER TO UPDATE THE BRANCH NAME)
 yarn jest $(git diff --name-only main...<BRANCH_NAME> | grep -vE 'test|styles|json' | xargs -n1 dirname | sort -u) --coverage --coverageReporters="json-summary"
 ```
-
-In your project folder a "coverage-summary.json" file will be created. Copy this into the directory of this project.
-
-Now checkout your branch and run the same jest command from above. This time rename the "coverage-summary.json" file to "coverage-summary_branch.json" and copy it into this project directory.
+Copy the "coverage/coverage-summary.json" file into this project folder as well (but do not rename it).
 
 Run this app with `http-server .` and find it at the address it says it's hosted at (usually `localhost:8080`) and the diff table will show up.
 
