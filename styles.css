@@ -11,6 +11,13 @@ body {
 #comparison-table td {
   border: 1px solid #ddd;
   padding: 8px;
+  p {
+    margin: 0;
+  }
+  small {
+    display: block;
+    font-size: 12px;
+  }
 }
 
 #comparison-table tr:nth-child(even) {
@@ -30,7 +37,5 @@ body {
 }
 
 #comparison-table .failing {
-  background: rgb(255, 149, 149);
-  
-  
+  color: red;
 }

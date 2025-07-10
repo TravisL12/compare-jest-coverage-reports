@@ -1,4 +1,5 @@
 const tableEl = document.getElementById("comparison-table");
+const thresholdInput = document.getElementById("threshold");
 
 const fetchCoverage = async (filePath) => {
   const response = await fetch(filePath);
@@ -6,7 +7,7 @@ const fetchCoverage = async (filePath) => {
   return data;
 };
 
-const params = ["branches", "functions", "lines", "statements"];
+const params = ["lines", "branches", "functions", "statements"];
 
 const app = async () => {
   const branchCoverage = await fetchCoverage("./coverage-summary_branch.json");
@@ -18,7 +19,7 @@ const app = async () => {
 
 const isPopulated = (obj) => {
   return params.some((param) => {
-    return obj[param] < 0;
+    return obj[param].diff !== 0;
   });
 };
 
@@ -29,14 +30,25 @@ const compare = (branch, main) => {
 
     const b = branch[branchKey];
     const m = main[branchKey];
+
+    if (!m || !b) {
+      console.log(b, m);
+      return acc;
+
+    }
+
     params.forEach((param) => {
       const branchValue = b[param].pct;
       const mainValue = m[param].pct;
-      const diff = parseFloat((mainValue - branchValue).toFixed(4));
-      newFile[param] = diff;
+      const diff = parseFloat((branchValue - mainValue).toFixed(4));
+      newFile[param] = { pct: branchValue, diff };
     });
 
-    if (isPopulated(newFile) && acc[branchKey] === undefined) {
+    if (
+      isPopulated(newFile) &&
+      acc[branchKey] === undefined &&
+      branchKey !== "total"
+    ) {
       acc[branchKey] = newFile;
     }
 
@@ -47,6 +59,7 @@ const compare = (branch, main) => {
 };
 
 const populateTable = (comparison) => {
+  const threshold = parseFloat(thresholdInput.value);
   const headerRow = document.createElement("tr");
   const fileHeader = document.createElement("th");
   fileHeader.textContent = "File Name";
@@ -67,7 +80,8 @@ const populateTable = (comparison) => {
 
     params.forEach((param) => {
       const cell = document.createElement("td");
-      cell.textContent = data[param];
+      cell.innerHTML = `<p>${data[param].pct}%</p><small>(${data[param].diff})</small>`;
+      cell.classList.toggle("failing", parseFloat(data[param].diff) < threshold);
       row.appendChild(cell);
     });
 
@@ -78,10 +92,7 @@ const populateTable = (comparison) => {
     const row = createRow(file, comparison[file]);
     tableEl.appendChild(row);
   });
-  checkThreshold();
 };
-
-const thresholdInput = document.getElementById("threshold");
 
 const checkThreshold = () => {
   const threshold = parseFloat(thresholdInput.value);
@@ -90,8 +101,9 @@ const checkThreshold = () => {
   for (let i = 1; i < rows.length; i++) {
     const cells = rows[i].getElementsByTagName("td");
     for (let j = 1; j < cells.length; j++) {
-      const value = parseFloat(cells[j].textContent);
-      cells[j].classList.toggle("failing", value < threshold);
+      const el = cells[j].querySelector("small");
+      const value = Number(el.textContent.replace(/[()]/g, ""));
+      el.classList.toggle("failing", value < threshold);
     }
   }
 };
