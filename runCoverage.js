@@ -57,6 +57,28 @@ function copyCoverageFile(branch, isMain = false) {
   console.log(`✅ Coverage file copied to ${destName}`);
 }
 
+// Run sub command
+async function getChangedDirs(branchName) {
+  const diffCommand = `git diff --name-only main...${branchName} | grep -vE 'test|styles|json' | xargs -n1 dirname | sort -u`;
+
+  try {
+    const { stdout } = await execAsync(diffCommand, {
+      cwd: targetDir,
+      shell: "/bin/bash",
+    }); // shell matters here
+    const dirs = stdout
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    return dirs;
+  } catch (err) {
+    console.error(
+      `❌ Failed to get changed directories:\n${err.stderr || err.message}`
+    );
+    return [];
+  }
+}
+
 (async () => {
   console.log(`📂 Working in directory: ${targetDir}`);
   console.log(`🔀 Target branch: ${branchName}`);
@@ -76,8 +98,9 @@ function copyCoverageFile(branch, isMain = false) {
   // Switch to main and run another command
   await runGit(`git checkout main`, `Switching to main`);
   await runGit(`git status`, `Status on main`);
+  const subCommand = await getChangedDirs(branchName);
   await runGit(
-    `yarn jest $(git diff --name-only main...${branchName} | grep -vE 'test|styles|json' | xargs -n1 dirname | sort -u) --coverage --coverageReporters="json-summary"`,
+    `yarn jest ${subCommand} --coverage --coverageReporters="json-summary"`,
     `Running Coverage on Main`
   );
   copyCoverageFile(branchName, true);
