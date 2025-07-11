@@ -43,7 +43,7 @@ function copyCoverageFile(branch, isMain = false) {
   const source = path.join(targetDir, "coverage", "coverage-summary.json");
   const destName = isMain
     ? "coverage-summary.json"
-    : `coverage-summary_${branch.replace(/[^\w.-]+/g, "_")}.json`;
+    : `coverage-summary_branch.json`;
   const destination = path.join(projectRoot, destName);
 
   console.log(`\n📁 Copying coverage-summary to: ${destName}`);
@@ -57,20 +57,30 @@ function copyCoverageFile(branch, isMain = false) {
   console.log(`✅ Coverage file copied to ${destName}`);
 }
 
+async function getFiles(command) {
+  const { stdout } = await execAsync(command, {
+    cwd: targetDir,
+    shell: "/bin/bash",
+  }); // shell matters here
+  const results = stdout
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join(" ");
+
+  return results;
+}
+
 // Run sub command
 async function getChangedDirs(branchName) {
-  const diffCommand = `git diff --name-only main...${branchName} | grep -vE 'test|styles|json' | xargs -n1 dirname | sort -u`;
-
   try {
-    const { stdout } = await execAsync(diffCommand, {
-      cwd: targetDir,
-      shell: "/bin/bash",
-    }); // shell matters here
-    const dirs = stdout
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
-    return dirs;
+    const diffCommand = `git diff --name-only main...${branchName} | grep -vE 'test|styles|json'`; // | xargs -n1 dirname | sort -u`;
+    const dirs = await getFiles(diffCommand);
+
+    const findRelatedCommand = `yarn jest --listTests --findRelatedTests ${dirs}`;
+    const related = await getFiles(findRelatedCommand);
+
+    return related;
   } catch (err) {
     console.error(
       `❌ Failed to get changed directories:\n${err.stderr || err.message}`
@@ -79,10 +89,7 @@ async function getChangedDirs(branchName) {
   }
 }
 
-(async () => {
-  console.log(`📂 Working in directory: ${targetDir}`);
-  console.log(`🔀 Target branch: ${branchName}`);
-
+const runOnBranch = async () => {
   // Static Git command on the given branch
   await runGit(
     `git checkout ${branchName}`,
@@ -94,8 +101,9 @@ async function getChangedDirs(branchName) {
     `Running Coverage on ${branchName}`
   );
   copyCoverageFile(branchName);
+};
 
-  // Switch to main and run another command
+const runOnMain = async () => {
   await runGit(`git checkout main`, `Switching to main`);
   await runGit(`git status`, `Status on main`);
   const subCommand = await getChangedDirs(branchName);
@@ -104,4 +112,12 @@ async function getChangedDirs(branchName) {
     `Running Coverage on Main`
   );
   copyCoverageFile(branchName, true);
+};
+
+(async () => {
+  console.log(`📂 Working in directory: ${targetDir}`);
+  console.log(`🔀 Target branch: ${branchName}`);
+
+  await runOnBranch(); // Static Git command on the given branch
+  await runOnMain(); // Switch to main and run another command
 })();
