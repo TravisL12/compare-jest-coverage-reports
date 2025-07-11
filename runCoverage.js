@@ -68,7 +68,8 @@ function copyCoverageFile(branch, isMain = false) {
   );
   await runGit(`git log -1`, `Latest commit on ${branchName}`);
   await runGit(
-    `yarn jest --coverage --changedSince main --coverageReporters="json-summary"`
+    `yarn jest --coverage --changedSince main --coverageReporters="json-summary"`,
+    `Running Coverage on ${branchName}`
   );
   copyCoverageFile(branchName);
 
@@ -76,7 +77,8 @@ function copyCoverageFile(branch, isMain = false) {
   await runGit(`git checkout main`, `Switching to main`);
   await runGit(`git status`, `Status on main`);
   await runGit(
-    `yarn jest $(git diff --name-only main...${branchName} | grep -vE 'test|styles|json' | xargs -n1 dirname | sort -u) --coverage --coverageReporters="json-summary"`
+    `yarn jest $(git diff --name-only main...${branchName} | grep -vE 'test|styles|json' | xargs -n1 dirname | sort -u) --coverage --coverageReporters="json-summary"`,
+    `Running Coverage on Main`
   );
   copyCoverageFile(branchName, true);
 })();
