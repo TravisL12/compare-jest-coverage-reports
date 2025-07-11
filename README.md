@@ -15,26 +15,6 @@ node runCoverage.js ../my-project-folder my-branch
 
 Once that completes run this app with `http-server .` and find it at the address it says it's hosted at (usually `localhost:8080`) and the diff table will show up. Sometimes the PORT changes if 8080 is already being used.
 
-### Setup [Old]
-
-Run a jest coverage report with coverage-summary on both branches and then copy the "coverage-summary.json" file from each run into this project.
-
-Start with your dev branch:
-```
-// Run on branch
-yarn jest --coverage --changedSince main --coverageReporters="json-summary"
-```
-Checkout your dev branch and run the command from above. Change the "coverage/coverage-summary.json" file to "coverage-summary_branch.json" and copy it into this project directory.
-
-Now switch over to `main`:
-```
-// Run on main (REMEMBER TO UPDATE THE BRANCH NAME)
-yarn jest $(git diff --name-only main...<BRANCH_NAME> | grep -vE 'test|styles|json' | xargs -n1 dirname | sort -u) --coverage --coverageReporters="json-summary"
-```
-Copy the "coverage/coverage-summary.json" file into this project folder as well (but do not rename it).
-
-Run this app with `http-server .` and find it at the address it says it's hosted at (usually `localhost:8080`) and the diff table will show up.
-
 ##### Dependencies
 
 If you don't have `http-server` installed you can use `npm install -g http-server` or `yarn global add http-server`
@@ -55,5 +35,25 @@ If you don't have `http-server` installed you can use `npm install -g http-serve
 - Compare these two reports
 
 ### What isn't working
-- I can't seem to get a coverage report on `main` of just the files changed in my branch. I am only able to do a coverage report of _every_ file on `main` which takes a long time to run (10+ minutes). Although this is still faster than CI, it'd be a dramatic improvement if I could get the files only that I want.
-- Maybe the ordering of the arguments is the problem? ^(this might have been it. Think we solved it)
+- ~I can't seem to get a coverage report on `main` of just the files changed in my branch. I am only able to do a coverage report of _every_ file on `main` which takes a long time to run (10+ minutes). Although this is still faster than CI, it'd be a dramatic improvement if I could get the files only that I want.~
+- ~Maybe the ordering of the arguments is the problem? ^(this might have been it. Think we solved it)~
+
+- ### (old) Setup - ignore
+
+Run a jest coverage report with coverage-summary on both branches and then copy the "coverage-summary.json" file from each run into this project.
+
+Start with your dev branch:
+```
+// Run on branch
+yarn jest --coverage --changedSince main --coverageReporters="json-summary"
+```
+Checkout your dev branch and run the command from above. Change the "coverage/coverage-summary.json" file to "coverage-summary_branch.json" and copy it into this project directory.
+
+Now switch over to `main`:
+```
+// Run on main (REMEMBER TO UPDATE THE BRANCH NAME)
+yarn jest $(git diff --name-only main...<BRANCH_NAME> | grep -vE 'test|styles|json' | xargs -n1 dirname | sort -u) --coverage --coverageReporters="json-summary"
+```
+Copy the "coverage/coverage-summary.json" file into this project folder as well (but do not rename it).
+
+Run this app with `http-server .` and find it at the address it says it's hosted at (usually `localhost:8080`) and the diff table will show up.
