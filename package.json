@@ -6,7 +6,8 @@
   "author": "Travis Lawrence <travis.lawrence12@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon server.js",
+    "dev": "nodemon server.js",
+    "start": "node server.js",
     "coverage": "node runCoverage.js"
   },
   "dependencies": {

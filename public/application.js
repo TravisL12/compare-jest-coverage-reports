@@ -1,10 +1,64 @@
 const tableEl = document.getElementById("comparison-table");
 const controlsForm = document.getElementById("controls-form");
 
+// localStorage functions
+const saveToLocalStorage = (key, value) => {
+  const existing = JSON.parse(localStorage.getItem(key) || "[]");
+  if (!existing.includes(value) && value.trim() !== "") {
+    existing.unshift(value);
+    if (existing.length > 10) existing.pop(); // Keep only last 10 values
+    localStorage.setItem(key, JSON.stringify(existing));
+  }
+};
+
+const loadFromLocalStorage = (key) => {
+  return JSON.parse(localStorage.getItem(key) || "[]");
+};
+
+const populateSelect = (selectId, values) => {
+  const select = document.getElementById(selectId);
+  // Clear existing options except the first one
+  while (select.children.length > 1) {
+    select.removeChild(select.lastChild);
+  }
+
+  values.forEach((value) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    select.appendChild(option);
+  });
+};
+
+const loadStoredValues = () => {
+  const directories = loadFromLocalStorage("directories");
+  const branches = loadFromLocalStorage("branches");
+  populateSelect("coverageDirSelect", directories);
+  populateSelect("branchNameSelect", branches);
+  
+  // Auto-populate text fields with the most recent values
+  if (directories.length > 0) {
+    controlsForm.coverageDir.value = directories[0];
+  }
+  if (branches.length > 0) {
+    controlsForm.branchName.value = branches[0];
+  }
+};
+
 const fetchCoverage = async () => {
+  // Save values to localStorage before submitting
+  const dirValue = controlsForm.coverageDir.value;
+  const branchValue = controlsForm.branchName.value;
+
+  saveToLocalStorage("directories", dirValue);
+  saveToLocalStorage("branches", branchValue);
+
+  // Refresh the select dropdowns
+  loadStoredValues();
+
   const body = JSON.stringify({
-    targetDir: controlsForm.coverageDir.value,
-    branchName: controlsForm.branchName.value,
+    targetDir: dirValue,
+    branchName: branchValue,
     skipMain: controlsForm["skip-main"].checked,
   });
   const response = await fetch("/run-coverage", {
@@ -124,7 +178,23 @@ const checkThreshold = () => {
 controlsForm.threshold.addEventListener("input", checkThreshold);
 controlsForm["update-compare"].addEventListener("click", fetchCoverage);
 
+// Add event listeners for select dropdowns
+document.getElementById("coverageDirSelect").addEventListener("change", (e) => {
+  if (e.target.value) {
+    controlsForm.coverageDir.value = e.target.value;
+  }
+});
+
+document.getElementById("branchNameSelect").addEventListener("change", (e) => {
+  if (e.target.value) {
+    controlsForm.branchName.value = e.target.value;
+  }
+});
+
 const init = async () => {
+  // Load stored values on page load
+  loadStoredValues();
+
   const branchCoverage = await fetchFile();
   const mainCoverage = await fetchFile(true);
   const [branch, main] = await Promise.all([branchCoverage, mainCoverage]);
