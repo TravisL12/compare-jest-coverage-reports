@@ -52,7 +52,21 @@ app.get("/coverage/:branchName", (req, res) => {
       .json({ error: `Coverage file not found: ${filename}` });
   }
 
-  res.sendFile(filePath);
+  try {
+    const fileContent = fs.readFileSync(filePath, "utf8");
+    const stats = fs.statSync(filePath);
+    const coverageData = JSON.parse(fileContent);
+
+    res.json({
+      data: coverageData,
+      lastModified: stats.mtime.toISOString(),
+      filename: filename,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: `Error reading coverage file: ${error.message}` });
+  }
 });
 
 const PORT = process.env.PORT || 3000;

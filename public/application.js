@@ -15,6 +15,16 @@ const loadFromLocalStorage = (key) => {
   return JSON.parse(localStorage.getItem(key) || "[]");
 };
 
+const updateElapsedTimer = (seconds, isComplete = false) => {
+  const timerEl = document.getElementById("elapsed-timer");
+  if (timerEl) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    const timeString = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    timerEl.textContent = isComplete ? `Completed in ${timeString}` : `Elapsed: ${timeString}`;
+  }
+};
+
 const populateSelect = (selectId, values) => {
   const select = document.getElementById(selectId);
   // Clear existing options except the first one
@@ -56,30 +66,58 @@ const fetchCoverage = async () => {
   // Refresh the select dropdowns
   loadStoredValues();
 
-  const body = JSON.stringify({
-    targetDir: dirValue,
-    branchName: branchValue,
-    skipMain: controlsForm["skip-main"].checked,
-  });
-  const response = await fetch("/run-coverage", {
-    method: "POST",
-    body,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  const data = await response.json();
-  console.log(data);
-  return data;
+  // Start timer
+  const startTime = Date.now();
+  updateElapsedTimer(0);
+  const timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    updateElapsedTimer(elapsed);
+  }, 1000);
+
+  try {
+    const body = JSON.stringify({
+      targetDir: dirValue,
+      branchName: branchValue,
+      skipMain: controlsForm["skip-main"].checked,
+    });
+    const response = await fetch("/run-coverage", {
+      method: "POST",
+      body,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await response.json();
+    console.log(data);
+    return data;
+  } finally {
+    // Stop timer
+    clearInterval(timerInterval);
+    const totalElapsed = Math.floor((Date.now() - startTime) / 1000);
+    updateElapsedTimer(totalElapsed, true);
+  }
 };
 
 const params = ["lines", "branches", "functions", "statements"];
 
 const fetchFile = async (isMain = false) => {
   const branchName = isMain ? "main" : controlsForm.branchName.value || "any";
-  const data = await fetch(`./coverage/${branchName}`);
-  const resp = await data.json();
-  return resp;
+  const response = await fetch(`./coverage/${branchName}`);
+  const resp = await response.json();
+  
+  // Update last modified display
+  if (resp.lastModified) {
+    const date = new Date(resp.lastModified);
+    const formattedDate = date.toLocaleString();
+    const elementId = isMain ? "main-last-modified" : "branch-last-modified";
+    const label = isMain ? "Main" : "Branch";
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.textContent = `${label} last updated: ${formattedDate}`;
+    }
+  }
+  
+  return resp.data || resp;
 };
 
 const isPopulated = (obj) => {
@@ -176,7 +214,9 @@ const checkThreshold = () => {
 };
 
 controlsForm.threshold.addEventListener("input", checkThreshold);
-controlsForm["update-compare"].addEventListener("click", fetchCoverage);
+controlsForm["update-compare"].addEventListener("click", async () => {
+  await fetchCoverage();
+});
 
 // Add event listeners for select dropdowns
 document.getElementById("coverageDirSelect").addEventListener("change", (e) => {
