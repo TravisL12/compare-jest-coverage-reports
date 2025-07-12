@@ -9,9 +9,16 @@ const fetchCoverage = async (filePath) => {
 
 const params = ["lines", "branches", "functions", "statements"];
 
+const fetchFile = async (branchName) => {
+  const data = await fetch(`./coverage/${branchName}`);
+  const resp = await data.json();
+  console.log(resp);
+  return resp;
+};
+
 const app = async () => {
-  const branchCoverage = await fetchCoverage("./coverage-summary_branch.json");
-  const mainCoverage = await fetchCoverage("./coverage-summary.json");
+  const branchCoverage = await fetchFile("my-branch");
+  const mainCoverage = await fetchFile("main");
   const [branch, main] = await Promise.all([branchCoverage, mainCoverage]);
   const data = compare(branch, main);
   populateTable(data);
@@ -34,7 +41,6 @@ const compare = (branch, main) => {
     if (!m || !b) {
       console.log(b, m);
       return acc;
-
     }
 
     params.forEach((param) => {
@@ -81,7 +87,10 @@ const populateTable = (comparison) => {
     params.forEach((param) => {
       const cell = document.createElement("td");
       cell.innerHTML = `<p>${data[param].pct}%</p><small>(${data[param].diff})</small>`;
-      cell.classList.toggle("failing", parseFloat(data[param].diff) < threshold);
+      cell.classList.toggle(
+        "failing",
+        parseFloat(data[param].diff) < threshold
+      );
       row.appendChild(cell);
     });
 

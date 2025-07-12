@@ -117,7 +117,7 @@ const runOnMain = async () => {
   copyCoverageFile(branchName, true);
 };
 
-(async () => {
+const runCoverage = async () => {
   console.log(`📂 Working in directory: ${targetDir}`);
   console.log(`🔀 Target branch: ${branchName}`);
 
@@ -127,4 +127,6 @@ const runOnMain = async () => {
   } else {
     console.log("Main branch coverage skipped");
   }
-})();
+};
+
+module.exports = { runCoverage };
