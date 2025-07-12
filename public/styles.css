@@ -39,3 +39,8 @@ body {
 #comparison-table .failing {
   color: red;
 }
+
+form#controls-form {
+  display: flex;
+  gap: 30px;
+}

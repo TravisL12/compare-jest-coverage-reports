@@ -1,20 +1,31 @@
 const tableEl = document.getElementById("comparison-table");
-const thresholdInput = document.getElementById("threshold");
+const controlsForm = document.getElementById("controls-form");
 
-const fetchCoverage = async (filePath) => {
-  const response = await fetch(filePath);
+const fetchCoverage = async () => {
+  const body = JSON.stringify({
+    targetDir: controlsForm.coverageDir.value,
+    branchName: controlsForm.branchName.value,
+    skipMain: controlsForm["skip-main"].checked,
+  });
+  const response = await fetch("/run-coverage", {
+    method: "POST",
+    body,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
   const data = await response.json();
+  console.log(data);
   return data;
 };
 
 const params = ["lines", "branches", "functions", "statements"];
 
-const app = async () => {
-  const branchCoverage = await fetchCoverage("./coverage-summary_branch.json");
-  const mainCoverage = await fetchCoverage("./coverage-summary.json");
-  const [branch, main] = await Promise.all([branchCoverage, mainCoverage]);
-  const data = compare(branch, main);
-  populateTable(data);
+const fetchFile = async (isMain = false) => {
+  const branchName = isMain ? "main" : controlsForm.branchName.value || "any";
+  const data = await fetch(`./coverage/${branchName}`);
+  const resp = await data.json();
+  return resp;
 };
 
 const isPopulated = (obj) => {
@@ -34,7 +45,6 @@ const compare = (branch, main) => {
     if (!m || !b) {
       console.log(b, m);
       return acc;
-
     }
 
     params.forEach((param) => {
@@ -59,7 +69,7 @@ const compare = (branch, main) => {
 };
 
 const populateTable = (comparison) => {
-  const threshold = parseFloat(thresholdInput.value);
+  const threshold = parseFloat(controlsForm.threshold.value);
   const headerRow = document.createElement("tr");
   const fileHeader = document.createElement("th");
   fileHeader.textContent = "File Name";
@@ -81,7 +91,10 @@ const populateTable = (comparison) => {
     params.forEach((param) => {
       const cell = document.createElement("td");
       cell.innerHTML = `<p>${data[param].pct}%</p><small>(${data[param].diff})</small>`;
-      cell.classList.toggle("failing", parseFloat(data[param].diff) < threshold);
+      cell.classList.toggle(
+        "failing",
+        parseFloat(data[param].diff) < threshold
+      );
       row.appendChild(cell);
     });
 
@@ -95,7 +108,7 @@ const populateTable = (comparison) => {
 };
 
 const checkThreshold = () => {
-  const threshold = parseFloat(thresholdInput.value);
+  const threshold = parseFloat(controlsForm.threshold.value);
   const rows = tableEl.getElementsByTagName("tr");
 
   for (let i = 1; i < rows.length; i++) {
@@ -108,6 +121,15 @@ const checkThreshold = () => {
   }
 };
 
-thresholdInput.addEventListener("input", checkThreshold);
+controlsForm.threshold.addEventListener("input", checkThreshold);
+controlsForm["update-compare"].addEventListener("click", fetchCoverage);
 
-app();
+const init = async () => {
+  const branchCoverage = await fetchFile();
+  const mainCoverage = await fetchFile(true);
+  const [branch, main] = await Promise.all([branchCoverage, mainCoverage]);
+  const data = compare(branch, main);
+  populateTable(data);
+};
+
+init();
