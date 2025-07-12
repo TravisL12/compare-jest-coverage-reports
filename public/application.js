@@ -1,24 +1,36 @@
 const tableEl = document.getElementById("comparison-table");
-const thresholdInput = document.getElementById("threshold");
+const controlsForm = document.getElementById("controls-form");
 
-const fetchCoverage = async (filePath) => {
-  const response = await fetch(filePath);
+const fetchCoverage = async () => {
+  const body = JSON.stringify({
+    targetDir: "../amazonScrape",
+    branchName: controlsForm.branchName.value,
+    skipMain: controlsForm["skip-main"].checked,
+  });
+  const response = await fetch("/run-coverage", {
+    method: "POST",
+    body,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
   const data = await response.json();
+  console.log(data);
   return data;
 };
 
 const params = ["lines", "branches", "functions", "statements"];
 
-const fetchFile = async (branchName) => {
+const fetchFile = async (isMain = false) => {
+  const branchName = isMain ? "main" : controlsForm.branchName.value || "any";
   const data = await fetch(`./coverage/${branchName}`);
   const resp = await data.json();
-  console.log(resp);
   return resp;
 };
 
 const app = async () => {
-  const branchCoverage = await fetchFile("my-branch");
-  const mainCoverage = await fetchFile("main");
+  const branchCoverage = await fetchFile();
+  const mainCoverage = await fetchFile(true);
   const [branch, main] = await Promise.all([branchCoverage, mainCoverage]);
   const data = compare(branch, main);
   populateTable(data);
@@ -65,7 +77,7 @@ const compare = (branch, main) => {
 };
 
 const populateTable = (comparison) => {
-  const threshold = parseFloat(thresholdInput.value);
+  const threshold = parseFloat(controlsForm.threshold.value);
   const headerRow = document.createElement("tr");
   const fileHeader = document.createElement("th");
   fileHeader.textContent = "File Name";
@@ -104,7 +116,7 @@ const populateTable = (comparison) => {
 };
 
 const checkThreshold = () => {
-  const threshold = parseFloat(thresholdInput.value);
+  const threshold = parseFloat(controlsForm.threshold.value);
   const rows = tableEl.getElementsByTagName("tr");
 
   for (let i = 1; i < rows.length; i++) {
@@ -117,6 +129,7 @@ const checkThreshold = () => {
   }
 };
 
-thresholdInput.addEventListener("input", checkThreshold);
+controlsForm.threshold.addEventListener("input", checkThreshold);
+controlsForm["update-compare"].addEventListener("click", fetchCoverage);
 
 app();
