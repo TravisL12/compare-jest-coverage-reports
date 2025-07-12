@@ -3,7 +3,7 @@ const controlsForm = document.getElementById("controls-form");
 
 const fetchCoverage = async () => {
   const body = JSON.stringify({
-    targetDir: "../amazonScrape",
+    targetDir: controlsForm.coverageDir.value,
     branchName: controlsForm.branchName.value,
     skipMain: controlsForm["skip-main"].checked,
   });
@@ -26,14 +26,6 @@ const fetchFile = async (isMain = false) => {
   const data = await fetch(`./coverage/${branchName}`);
   const resp = await data.json();
   return resp;
-};
-
-const app = async () => {
-  const branchCoverage = await fetchFile();
-  const mainCoverage = await fetchFile(true);
-  const [branch, main] = await Promise.all([branchCoverage, mainCoverage]);
-  const data = compare(branch, main);
-  populateTable(data);
 };
 
 const isPopulated = (obj) => {
@@ -132,4 +124,12 @@ const checkThreshold = () => {
 controlsForm.threshold.addEventListener("input", checkThreshold);
 controlsForm["update-compare"].addEventListener("click", fetchCoverage);
 
-app();
+const init = async () => {
+  const branchCoverage = await fetchFile();
+  const mainCoverage = await fetchFile(true);
+  const [branch, main] = await Promise.all([branchCoverage, mainCoverage]);
+  const data = compare(branch, main);
+  populateTable(data);
+};
+
+init();
