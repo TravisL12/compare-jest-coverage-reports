@@ -35,21 +35,31 @@ app.post("/run-coverage", async (req, res) => {
 
 app.get("/coverage/:branchName", (req, res) => {
   const { branchName } = req.params;
-  let filename;
+  const { targetBranch } = req.query;
 
+  // Determine which branch directory to look in
+  const branchDir = targetBranch || branchName;
+  const sanitizedBranchDir = branchDir.replace(/[^\w.-]+/g, "_");
+
+  let filename;
   if (branchName === "main") {
     filename = "coverage-summary.json";
   } else {
-    // filename = `coverage-summary_${type.replace(/[^\w.-]/g, "_")}.json`;
-    filename = `coverage-summary_branch.json`;
+    filename = "coverage-summary_branch.json";
   }
 
-  const filePath = path.join(process.cwd(), filename);
+  // Look in the branch-specific directory
+  const filePath = path.join(
+    process.cwd(),
+    "branches",
+    sanitizedBranchDir,
+    filename
+  );
 
   if (!fs.existsSync(filePath)) {
     return res
       .status(404)
-      .json({ error: `Coverage file not found: ${filename}` });
+      .json({ error: `Coverage file not found: ${filePath}` });
   }
 
   try {
@@ -61,6 +71,7 @@ app.get("/coverage/:branchName", (req, res) => {
       data: coverageData,
       lastModified: stats.mtime.toISOString(),
       filename: filename,
+      branchDir: sanitizedBranchDir,
     });
   } catch (error) {
     res

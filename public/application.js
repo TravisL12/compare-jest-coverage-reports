@@ -20,8 +20,12 @@ const updateElapsedTimer = (seconds, isComplete = false) => {
   if (timerEl) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    const timeString = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-    timerEl.textContent = isComplete ? `Completed in ${timeString}` : `Elapsed: ${timeString}`;
+    const timeString = `${minutes}:${remainingSeconds
+      .toString()
+      .padStart(2, "0")}`;
+    timerEl.textContent = isComplete
+      ? `Completed in ${timeString}`
+      : `Elapsed: ${timeString}`;
   }
 };
 
@@ -45,7 +49,7 @@ const loadStoredValues = () => {
   const branches = loadFromLocalStorage("branches");
   populateSelect("coverageDirSelect", directories);
   populateSelect("branchNameSelect", branches);
-  
+
   // Auto-populate text fields with the most recent values
   if (directories.length > 0) {
     controlsForm.coverageDir.value = directories[0];
@@ -102,9 +106,13 @@ const params = ["lines", "branches", "functions", "statements"];
 
 const fetchFile = async (isMain = false) => {
   const branchName = isMain ? "main" : controlsForm.branchName.value || "any";
-  const response = await fetch(`./coverage/${branchName}`);
+  const targetBranch = controlsForm.branchName.value || "any";
+  const url = `./coverage/${branchName}?targetBranch=${encodeURIComponent(
+    targetBranch
+  )}`;
+  const response = await fetch(url);
   const resp = await response.json();
-  
+
   // Update last modified display
   if (resp.lastModified) {
     const date = new Date(resp.lastModified);
@@ -116,7 +124,7 @@ const fetchFile = async (isMain = false) => {
       element.textContent = `${label} last updated: ${formattedDate}`;
     }
   }
-  
+
   return resp.data || resp;
 };
 
@@ -234,7 +242,7 @@ document.getElementById("branchNameSelect").addEventListener("change", (e) => {
 const init = async () => {
   // Load stored values on page load
   loadStoredValues();
-
+  console.log(controlsForm.branchName.value, "controlsForm.branchName.value");
   const branchCoverage = await fetchFile();
   const mainCoverage = await fetchFile(true);
   const [branch, main] = await Promise.all([branchCoverage, mainCoverage]);

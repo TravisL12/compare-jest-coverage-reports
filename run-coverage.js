@@ -42,10 +42,18 @@ async function getChangedDirs(branchName, cwd) {
 
 function copyCoverageFile(branchName, fromDir, toDir, isMain = false) {
   const source = path.join(fromDir, "coverage", "coverage-summary.json");
+  const sanitizedBranchName = branchName.replace(/[^\w.-]+/g, "_");
+  const branchDir = path.join(toDir, "branches", sanitizedBranchName);
+
+  // Create branch directory if it doesn't exist
+  if (!fs.existsSync(branchDir)) {
+    fs.mkdirSync(branchDir, { recursive: true });
+  }
+
   const destName = isMain
     ? "coverage-summary.json"
-    : `coverage-summary_${branchName.replace(/[^\w.-]+/g, "_")}.json`;
-  const destination = path.join(toDir, destName);
+    : "coverage-summary_branch.json";
+  const destination = path.join(branchDir, destName);
 
   if (!fs.existsSync(source))
     throw new Error(`Missing coverage file: ${source}`);
