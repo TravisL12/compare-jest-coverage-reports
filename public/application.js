@@ -60,7 +60,6 @@ const loadStoredValues = () => {
 };
 
 const fetchCoverage = async () => {
-  // Save values to localStorage before submitting
   const dirValue = controlsForm.coverageDir.value;
   const branchValue = controlsForm.branchName.value;
 
@@ -84,16 +83,14 @@ const fetchCoverage = async () => {
       branchName: branchValue,
       skipMain: controlsForm["skip-main"].checked,
     });
-    const response = await fetch("/run-coverage", {
+    await fetch("/run-coverage", {
       method: "POST",
       body,
       headers: {
         "Content-Type": "application/json",
       },
     });
-    const data = await response.json();
-    console.log(data);
-    return data;
+    await updateTable();
   } finally {
     // Stop timer
     clearInterval(timerInterval);
@@ -222,9 +219,7 @@ const checkThreshold = () => {
 };
 
 controlsForm.threshold.addEventListener("input", checkThreshold);
-controlsForm["update-compare"].addEventListener("click", async () => {
-  await fetchCoverage();
-});
+controlsForm["update-compare"].addEventListener("click", fetchCoverage);
 
 // Add event listeners for select dropdowns
 document.getElementById("coverageDirSelect").addEventListener("change", (e) => {
@@ -239,15 +234,18 @@ document.getElementById("branchNameSelect").addEventListener("change", (e) => {
   }
 });
 
-const init = async () => {
-  // Load stored values on page load
-  loadStoredValues();
-  console.log(controlsForm.branchName.value, "controlsForm.branchName.value");
+const updateTable = async () => {
   const branchCoverage = await fetchFile();
   const mainCoverage = await fetchFile(true);
   const [branch, main] = await Promise.all([branchCoverage, mainCoverage]);
   const data = compare(branch, main);
   populateTable(data);
+};
+
+const init = async () => {
+  // Load stored values on page load
+  loadStoredValues();
+  await updateTable();
 };
 
 init();
