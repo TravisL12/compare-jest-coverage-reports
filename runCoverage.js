@@ -8,7 +8,10 @@ const path = require("path");
 const execAsync = promisify(exec);
 
 // Get arguments
-const [, , targetDirArg, branchName] = process.argv;
+const args = process.argv.slice(2);
+const targetDirArg = args[0];
+const branchName = args[1];
+const skipMain = args[2] === "--skipMain";
 
 if (!targetDirArg || !branchName) {
   console.error(
@@ -74,7 +77,7 @@ async function getFiles(command) {
 // Run sub command
 async function getChangedDirs(branchName) {
   try {
-    const diffCommand = `git diff --name-only main...${branchName} | grep -vE 'test|styles|json'`; // | xargs -n1 dirname | sort -u`;
+    const diffCommand = `git diff --name-only main...${branchName} | grep -vE 'test|styles|json|mock'`;
     const dirs = await getFiles(diffCommand);
 
     const findRelatedCommand = `yarn jest --listTests --findRelatedTests ${dirs}`;
@@ -119,5 +122,9 @@ const runOnMain = async () => {
   console.log(`🔀 Target branch: ${branchName}`);
 
   await runOnBranch(); // Static Git command on the given branch
-  await runOnMain(); // Switch to main and run another command
+  if (!skipMain) {
+    await runOnMain(); // Switch to main and run another command
+  } else {
+    console.log("Main branch coverage skipped");
+  }
 })();
