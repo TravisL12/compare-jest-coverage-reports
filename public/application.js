@@ -178,6 +178,7 @@ const populateTable = (comparison) => {
     headerRow.appendChild(header);
   });
 
+  tableEl.innerHTML = "";
   tableEl.appendChild(headerRow);
   const createRow = (file, data) => {
     const row = document.createElement("tr");
