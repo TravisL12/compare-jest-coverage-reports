@@ -66,7 +66,8 @@ const populateTable = (comparison) => {
   const createRow = (file, data) => {
     const row = document.createElement("tr");
     const fileCell = document.createElement("td");
-    fileCell.textContent = file.replace(/^.*\/packages\//, "");
+    fileCell.textContent = file.replace(/^.*\/packages\//, ""); // trims name down
+    // fileCell.textContent = file.split("/").slice(-5).join("/"); // only shows last 3 path items
     row.appendChild(fileCell);
 
     TEST_CATEGORIES.forEach((param) => {
@@ -104,7 +105,10 @@ const checkThreshold = () => {
 
 const setupListeners = () => {
   controlsForm.threshold.addEventListener("input", checkThreshold);
-  controlsForm["update-compare"].addEventListener("click", fetchCoverage);
+  controlsForm["update-compare"].addEventListener("click", async () => {
+    await fetchCoverage();
+    updateTable();
+  });
 
   coverageDirSelect.addEventListener("change", (e) => {
     if (e.target.value) {

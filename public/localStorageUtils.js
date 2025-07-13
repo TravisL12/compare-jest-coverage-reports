@@ -1,6 +1,6 @@
 import { controlsForm } from "./constants.js";
 
-const populateSelect = (selectId, values) => {
+const populateSelect = (selectId, values, selected) => {
   const select = document.getElementById(selectId);
   // Clear existing options except the first one
   while (select.children.length > 1) {
@@ -11,6 +11,7 @@ const populateSelect = (selectId, values) => {
     const option = document.createElement("option");
     option.value = value;
     option.textContent = value;
+    option.selected = value === selected;
     select.appendChild(option);
   });
 };
@@ -31,14 +32,16 @@ const loadFromLocalStorage = (key) => {
 export const loadStoredValues = () => {
   const directories = loadFromLocalStorage("directories");
   const branches = loadFromLocalStorage("branches");
-  populateSelect("coverageDirSelect", directories);
-  populateSelect("branchNameSelect", branches);
 
   // Auto-populate text fields with the most recent values
   if (directories.length > 0) {
-    controlsForm.coverageDir.value = directories[0];
+    const selected = directories[0];
+    populateSelect("coverageDirSelect", directories, selected);
+    controlsForm.coverageDir.value = selected;
   }
   if (branches.length > 0) {
-    controlsForm.branchName.value = branches[0];
+    const selected = branches[0];
+    populateSelect("branchNameSelect", branches, selected);
+    controlsForm.branchName.value = selected;
   }
 };

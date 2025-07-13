@@ -1,4 +1,5 @@
 import { controlsForm, timerEl } from "./constants.js";
+import { loadStoredValues, saveToLocalStorage } from "./localStorageUtils.js";
 
 const updateElapsedTimer = (seconds, isComplete = false) => {
   if (timerEl) {
@@ -44,7 +45,6 @@ export const fetchCoverage = async () => {
         "Content-Type": "application/json",
       },
     });
-    await updateTable();
   } finally {
     // Stop timer
     clearInterval(timerInterval);
