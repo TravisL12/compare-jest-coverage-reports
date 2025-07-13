@@ -46,11 +46,15 @@
           <select id="branchNameSelect" name="branchNameSelect">
             <option value="">Select previous branch...</option>
           </select>
-          <div id="branch-last-modified"></div>
-          <div id="main-last-modified"></div>
+          <div class="last-date" id="branch-last-modified"></div>
+          <div class="last-date" id="main-last-modified"></div>
         </div>
         <div>
-          <label for="skip-main">Skip main branch?</label>
+          <label
+            for="skip-main"
+            title="This skips the main branch coverage from running again. Useful if you have recently run coverage already."
+            >Skip main branch?</label
+          >
           <input type="checkbox" id="skip-main" name="skip-main" />
         </div>
         <div>
@@ -66,5 +70,5 @@
       <table id="comparison-table"></table>
     </div>
   </body>
-  <script type="module" src="./application.js"></script>
+  <script type="module" src="./index.js"></script>
 </html>
