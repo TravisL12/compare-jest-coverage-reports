@@ -2,6 +2,8 @@
 
 Use this to compare a jest coverage report with another branch to see the coverage difference. This generally would be used to compare if test coverage has dropped between a feature branch and `main`.
 
+<img width="1432" height="470" alt="image" src="https://github.com/user-attachments/assets/1e568776-2452-4f0c-a7a0-acda59018ef0" />
+
 ### Latest Setup
 
 Run the project:
