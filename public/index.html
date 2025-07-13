@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="./styles.css" rel="stylesheet" />
+    <title>Compare coverage!</title>
+  </head>
+  <body>
+    <h1>Comparing coverage percents</h1>
+    <div id="app">
+      <form id="controls-form">
+        <div>
+          <label for="threshold">Threshold Coverage:</label>
+          <input
+            type="number"
+            id="threshold"
+            name="threshold"
+            min="-100"
+            max="100"
+            step="1"
+            placeholder="Enter threshold percentage"
+            value="-3"
+          />
+        </div>
+        <div>
+          <label for="coverageDir">Directory</label>
+          <input
+            type="text"
+            id="coverageDir"
+            name="coverageDir"
+            placeholder="Enter the directory to run against"
+          />
+          <select id="coverageDirSelect" name="coverageDirSelect">
+            <option value="">Select previous directory...</option>
+          </select>
+        </div>
+        <div>
+          <label for="branchName">Branch to Fetch</label>
+          <input
+            type="text"
+            id="branchName"
+            name="branchName"
+            placeholder="Enter branch to fetch and compare to Main"
+          />
+          <select id="branchNameSelect" name="branchNameSelect">
+            <option value="">Select previous branch...</option>
+          </select>
+          <div id="branch-last-modified"></div>
+          <div id="main-last-modified"></div>
+        </div>
+        <div>
+          <label for="skip-main">Skip main branch?</label>
+          <input type="checkbox" id="skip-main" name="skip-main" />
+        </div>
+        <div>
+          <input
+            type="button"
+            id="update-compare"
+            value="Update"
+            name="update-compare"
+          />
+          <div id="elapsed-timer"></div>
+        </div>
+      </form>
+      <table id="comparison-table"></table>
+    </div>
+  </body>
+  <script type="module" src="./application.js"></script>
+</html>

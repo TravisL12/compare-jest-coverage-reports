@@ -1,0 +1,17 @@
+{
+  "name": "compare-coverage",
+  "version": "1.0.0",
+  "main": "application.js",
+  "repository": "git@github.com:TravisL12/compare-jest-coverage-reports.git",
+  "author": "Travis Lawrence <travis.lawrence12@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "coverage": "node runCoverage.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10"
+  }
+}
