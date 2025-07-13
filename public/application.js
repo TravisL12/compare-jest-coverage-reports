@@ -67,16 +67,11 @@ const populateTable = (comparison) => {
     const row = document.createElement("tr");
     const fileCell = document.createElement("td");
     fileCell.textContent = file.replace(/^.*\/packages\//, ""); // trims name down
-    // fileCell.textContent = file.split("/").slice(-5).join("/"); // only shows last 3 path items
     row.appendChild(fileCell);
 
     TEST_CATEGORIES.forEach((param) => {
       const cell = document.createElement("td");
       cell.innerHTML = `<p>${data[param].pct}%</p><small>(${data[param].diff})</small>`;
-      cell.classList.toggle(
-        "failing",
-        parseFloat(data[param].diff) < threshold
-      );
       row.appendChild(cell);
     });
 
@@ -87,6 +82,7 @@ const populateTable = (comparison) => {
     const row = createRow(file, comparison[file]);
     tableEl.appendChild(row);
   });
+  checkThreshold();
 };
 
 const checkThreshold = () => {

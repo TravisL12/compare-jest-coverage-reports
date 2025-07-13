@@ -44,5 +44,18 @@ body {
 
 form#controls-form {
   display: flex;
-  gap: 30px;
+  justify-content: space-between;
+  padding: 10px 0;
+  padding-right: 50px;
+}
+
+.last-date {
+  font-size: 14px;
+  color: gray;
+}
+
+.dropdowns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
