@@ -1,4 +1,10 @@
-import { controlsForm, tableEl, TEST_CATEGORIES } from "./constants.js";
+import {
+  branchNameSelect,
+  controlsForm,
+  coverageDirSelect,
+  tableEl,
+  TEST_CATEGORIES,
+} from "./constants.js";
 import { fetchFile, fetchCoverage } from "./fetchUtils.js";
 import { loadStoredValues } from "./localStorageUtils.js";
 
@@ -100,22 +106,17 @@ const setupListeners = () => {
   controlsForm.threshold.addEventListener("input", checkThreshold);
   controlsForm["update-compare"].addEventListener("click", fetchCoverage);
 
-  // Add event listeners for select dropdowns
-  document
-    .getElementById("coverageDirSelect")
-    .addEventListener("change", (e) => {
-      if (e.target.value) {
-        controlsForm.coverageDir.value = e.target.value;
-      }
-    });
+  coverageDirSelect.addEventListener("change", (e) => {
+    if (e.target.value) {
+      controlsForm.coverageDir.value = e.target.value;
+    }
+  });
 
-  document
-    .getElementById("branchNameSelect")
-    .addEventListener("change", (e) => {
-      if (e.target.value) {
-        controlsForm.branchName.value = e.target.value;
-      }
-    });
+  branchNameSelect.addEventListener("change", (e) => {
+    if (e.target.value) {
+      controlsForm.branchName.value = e.target.value;
+    }
+  });
 };
 
 const updateTable = async () => {

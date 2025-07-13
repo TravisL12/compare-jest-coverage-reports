@@ -1,7 +1,6 @@
-import { controlsForm } from "./constants.js";
+import { controlsForm, timerEl } from "./constants.js";
 
 const updateElapsedTimer = (seconds, isComplete = false) => {
-  const timerEl = document.getElementById("elapsed-timer");
   if (timerEl) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -57,11 +56,10 @@ export const fetchCoverage = async () => {
 export const fetchFile = async (isMain = false) => {
   const branchName = isMain ? "main" : controlsForm.branchName.value || "any";
   const targetBranch = controlsForm.branchName.value || "any";
-  const url = `./coverage/${branchName}?targetBranch=${encodeURIComponent(
-    targetBranch
-  )}`;
-  const response = await fetch(url);
-  const resp = await response.json();
+  const req = await fetch(
+    `./coverage/${branchName}?targetBranch=${encodeURIComponent(targetBranch)}`
+  );
+  const resp = await req.json();
 
   // Update last modified display
   if (resp.lastModified) {
