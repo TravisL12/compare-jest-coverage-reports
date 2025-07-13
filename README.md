@@ -12,7 +12,7 @@ Run the project:
 
 ### Using the UI
 
-The two arguments are for `targetDirectory` and `branchName`.
+The arguments are:
 
 - `targetDirectory` - your project folder where you want to run coverage reports (relative to this project's dir)
 - `branchName` - the branch you are comparing against `main`
