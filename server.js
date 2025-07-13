@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
 
 app.post("/run-coverage", async (req, res) => {
   const { targetDir, branchName, skipMain = false } = req.body;
-  console.log(targetDir, branchName, skipMain, "running??????");
+
   if (!targetDir || !branchName) {
     return res
       .status(400)
